@@ -1,5 +1,4 @@
 import folium
-
 from django.http import HttpResponseNotFound
 from django.shortcuts import render
 from django.utils import timezone
@@ -78,7 +77,7 @@ def show_pokemon(request, pokemon_id):
             img_url,
         )
 
-    pokemon_info = {
+    pokemon_profile = {
         "pokemon_id": pokemon.id,
         "img_url": img_url,
         "title_ru": pokemon.title,
@@ -95,7 +94,7 @@ def show_pokemon(request, pokemon_id):
             "img_url": request.build_absolute_uri(pokemon.evolved_from.image.url) if pokemon.evolved_from.image else DEFAULT_IMAGE_URL,
             "title_ru": pokemon.evolved_from.title,
         }
-        pokemon_info["previous_evolution"] = previous_evolution
+        pokemon_profile["previous_evolution"] = previous_evolution
 
     next_evolution = pokemon.evolutions.first()
     if next_evolution:
@@ -104,9 +103,9 @@ def show_pokemon(request, pokemon_id):
             "img_url": request.build_absolute_uri(next_evolution.image.url) if next_evolution.image else DEFAULT_IMAGE_URL,
             "title_ru": next_evolution.title,
         }
-        pokemon_info["next_evolution"] = next_evolution_characteristics
+        pokemon_profile["next_evolution"] = next_evolution_characteristics
 
     return render(request, "pokemon.html", context={
         "map": folium_map._repr_html_(),
-        "pokemon": pokemon_info,
+        "pokemon": pokemon_profile,
     })
