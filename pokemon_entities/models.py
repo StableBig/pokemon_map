@@ -3,18 +3,18 @@ from django.utils import timezone
 
 
 class Pokemon(models.Model):
-    title = models.CharField(max_length=200)
-    image = models.ImageField(upload_to='images/', null=True, blank=True)
-    description = models.TextField(blank=True)
-    title_en = models.CharField(max_length=200, blank=True)
-    title_jp = models.CharField(max_length=200, blank=True)
+    title = models.CharField(max_length=200, verbose_name="Имя покемона")
+    image = models.ImageField(upload_to="images/", null=True, blank=True, verbose_name="Изображение")
+    description = models.TextField(blank=True, verbose_name="Описание")
+    title_en = models.CharField(max_length=200, blank=True, verbose_name="Имя на английском")
+    title_jp = models.CharField(max_length=200, blank=True, verbose_name="Имя на японском")
     evolved_from = models.ForeignKey(
-        'self',
+        "self",
         on_delete=models.SET_NULL,
         null=True,
         blank=True,
-        related_name='evolutions',
-        verbose_name='Из кого эволюционировал'
+        related_name="evolutions",
+        verbose_name="Из кого эволюционировал"
     )
 
     def __str__(self):
@@ -22,17 +22,17 @@ class Pokemon(models.Model):
 
 
 class PokemonEntity(models.Model):
-    pokemon = models.ForeignKey(Pokemon, on_delete=models.CASCADE)
-    latitude = models.FloatField()
-    longitude = models.FloatField()
-    appeared_at = models.DateTimeField(default=timezone.now)
-    disappeared_at = models.DateTimeField(default=timezone.now)
+    pokemon = models.ForeignKey(Pokemon, on_delete=models.CASCADE, verbose_name="Покемон")
+    latitude = models.FloatField(verbose_name="Широта")
+    longitude = models.FloatField(verbose_name="Долгота")
+    appeared_at = models.DateTimeField(default=timezone.now, verbose_name="Время появления на карте")
+    disappeared_at = models.DateTimeField(default=timezone.now, verbose_name="Время исчезновения с карты")
 
-    level = models.IntegerField(default=0)
-    health = models.IntegerField(default=0)
-    attack = models.IntegerField(default=0)
-    defense = models.IntegerField(default=0)
-    stamina = models.IntegerField(default=0)
+    level = models.IntegerField(default=0, verbose_name="Уровень")
+    health = models.IntegerField(default=0, verbose_name="Здоровье")
+    attack = models.IntegerField(default=0, verbose_name="Атака")
+    defense = models.IntegerField(default=0, verbose_name="Защита")
+    stamina = models.IntegerField(default=0, verbose_name="Выносливость")
 
     def __str__(self):
         return f"{self.pokemon.title} at {self.latitude}, {self.longitude}"
