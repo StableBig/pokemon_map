@@ -85,7 +85,16 @@ def show_pokemon(request, pokemon_id):
         'title_en': pokemon.title_en,
         'title_jp': pokemon.title_jp,
         'description': pokemon.description,
+        'previous_evolution': None,
     }
+
+    if pokemon.evolved_from:
+        previous_evolution = {
+            "pokemon_id": pokemon.evolved_from.id,
+            "img_url": request.build_absolute_uri(pokemon.evolved_from.image.url) if pokemon.evolved_from.image else DEFAULT_IMAGE_URL,
+            "title_ru": pokemon.evolved_from.title,
+        }
+        pokemon_info['previous_evolution'] = previous_evolution
 
     return render(request, 'pokemon.html', context={
         'map': folium_map._repr_html_(),
