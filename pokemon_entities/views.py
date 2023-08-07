@@ -86,6 +86,7 @@ def show_pokemon(request, pokemon_id):
         'title_jp': pokemon.title_jp,
         'description': pokemon.description,
         'previous_evolution': None,
+        'next_evolution': None,
     }
 
     if pokemon.evolved_from:
@@ -95,6 +96,15 @@ def show_pokemon(request, pokemon_id):
             "title_ru": pokemon.evolved_from.title,
         }
         pokemon_info['previous_evolution'] = previous_evolution
+
+    next_evolution = pokemon.evolutions.first()
+    if next_evolution:
+        next_evolution_characteristics = {
+            "pokemon_id": next_evolution.id,
+            "img_url": request.build_absolute_uri(next_evolution.image.url) if next_evolution.image else DEFAULT_IMAGE_URL,
+            "title_ru": next_evolution.title,
+        }
+        pokemon_info['next_evolution'] = next_evolution_characteristics
 
     return render(request, 'pokemon.html', context={
         'map': folium_map._repr_html_(),
