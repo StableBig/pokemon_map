@@ -82,7 +82,7 @@ def show_pokemon(request, pokemon_id):
         'pokemon_id': pokemon.id,
         'img_url': img_url,
         'title_ru': pokemon.title,
-        # add any other fields from Pokemon model if needed
+        'description': pokemon.description,
     }
 
     return render(request, 'pokemon.html', context={
