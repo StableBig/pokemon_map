@@ -8,9 +8,9 @@ from .models import Pokemon
 
 MOSCOW_CENTER = [55.751244, 37.618423]
 DEFAULT_IMAGE_URL = (
-    'https://vignette.wikia.nocookie.net/pokemon/images/6/6e/%21.png/revision'
-    '/latest/fixed-aspect-ratio-down/width/240/height/240?cb=20130525215832'
-    '&fill=transparent'
+    "https://vignette.wikia.nocookie.net/pokemon/images/6/6e/%21.png/revision"
+    "/latest/fixed-aspect-ratio-down/width/240/height/240?cb=20130525215832"
+    "&fill=transparent"
 )
 
 
@@ -34,7 +34,7 @@ def show_all_pokemons(request):
     for pokemon in pokemons:
         for entity in pokemon.pokemonentity_set.filter(appeared_at__lte=now, disappeared_at__gte=now):
             img_url = DEFAULT_IMAGE_URL
-            if pokemon.image and hasattr(pokemon.image, 'url'):
+            if pokemon.image and hasattr(pokemon.image, "url"):
                 img_url = request.build_absolute_uri(pokemon.image.url)
             add_pokemon(
                 folium_map, entity.latitude,
@@ -45,17 +45,17 @@ def show_all_pokemons(request):
     pokemons_on_page = []
     for pokemon in pokemons:
         img_url = DEFAULT_IMAGE_URL
-        if pokemon.image and hasattr(pokemon.image, 'url'):
+        if pokemon.image and hasattr(pokemon.image, "url"):
             img_url = request.build_absolute_uri(pokemon.image.url)
         pokemons_on_page.append({
-            'pokemon_id': pokemon.id,
-            'img_url': img_url,
-            'title_ru': pokemon.title,
+            "pokemon_id": pokemon.id,
+            "img_url": img_url,
+            "title_ru": pokemon.title,
         })
 
-    return render(request, 'mainpage.html', context={
-        'map': folium_map._repr_html_(),
-        'pokemons': pokemons_on_page,
+    return render(request, "mainpage.html", context={
+        "map": folium_map._repr_html_(),
+        "pokemons": pokemons_on_page,
     })
 
 
@@ -63,10 +63,10 @@ def show_pokemon(request, pokemon_id):
     try:
         pokemon = Pokemon.objects.get(id=pokemon_id)
     except Pokemon.DoesNotExist:
-        return HttpResponseNotFound('<h1>Такой покемон не найден</h1>')
+        return HttpResponseNotFound("<h1>Такой покемон не найден</h1>")
 
     img_url = DEFAULT_IMAGE_URL
-    if pokemon.image and hasattr(pokemon.image, 'url'):
+    if pokemon.image and hasattr(pokemon.image, "url"):
         img_url = request.build_absolute_uri(pokemon.image.url)
 
     now = timezone.localtime()
@@ -79,14 +79,14 @@ def show_pokemon(request, pokemon_id):
         )
 
     pokemon_info = {
-        'pokemon_id': pokemon.id,
-        'img_url': img_url,
-        'title_ru': pokemon.title,
-        'title_en': pokemon.title_en,
-        'title_jp': pokemon.title_jp,
-        'description': pokemon.description,
-        'previous_evolution': None,
-        'next_evolution': None,
+        "pokemon_id": pokemon.id,
+        "img_url": img_url,
+        "title_ru": pokemon.title,
+        "title_en": pokemon.title_en,
+        "title_jp": pokemon.title_jp,
+        "description": pokemon.description,
+        "previous_evolution": None,
+        "next_evolution": None,
     }
 
     if pokemon.evolved_from:
@@ -95,7 +95,7 @@ def show_pokemon(request, pokemon_id):
             "img_url": request.build_absolute_uri(pokemon.evolved_from.image.url) if pokemon.evolved_from.image else DEFAULT_IMAGE_URL,
             "title_ru": pokemon.evolved_from.title,
         }
-        pokemon_info['previous_evolution'] = previous_evolution
+        pokemon_info["previous_evolution"] = previous_evolution
 
     next_evolution = pokemon.evolutions.first()
     if next_evolution:
@@ -104,9 +104,9 @@ def show_pokemon(request, pokemon_id):
             "img_url": request.build_absolute_uri(next_evolution.image.url) if next_evolution.image else DEFAULT_IMAGE_URL,
             "title_ru": next_evolution.title,
         }
-        pokemon_info['next_evolution'] = next_evolution_characteristics
+        pokemon_info["next_evolution"] = next_evolution_characteristics
 
-    return render(request, 'pokemon.html', context={
-        'map': folium_map._repr_html_(),
-        'pokemon': pokemon_info,
+    return render(request, "pokemon.html", context={
+        "map": folium_map._repr_html_(),
+        "pokemon": pokemon_info,
     })
