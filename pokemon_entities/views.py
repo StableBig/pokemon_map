@@ -13,6 +13,12 @@ DEFAULT_IMAGE_URL = (
 )
 
 
+def get_image_url(pokemon, request):
+    if pokemon.image and hasattr(pokemon.image, "url"):
+        return request.build_absolute_uri(pokemon.image.url)
+    return DEFAULT_IMAGE_URL
+
+
 def add_pokemon(folium_map, lat, lon, image_url=DEFAULT_IMAGE_URL):
     icon = folium.features.CustomIcon(
         image_url,
@@ -35,9 +41,7 @@ def show_all_pokemons(request):
     pokemons_on_page = []
 
     for pokemon in pokemons:
-        img_url = DEFAULT_IMAGE_URL
-        if pokemon.image and hasattr(pokemon.image, "url"):
-            img_url = request.build_absolute_uri(pokemon.image.url)
+        img_url = get_image_url(pokemon, request)
 
         active_entities = [entity for entity in pokemon.entities.all() if
                            entity.appeared_at <= now <= entity.disappeared_at]
@@ -64,9 +68,7 @@ def show_all_pokemons(request):
 def show_pokemon(request, pokemon_id):
     pokemon = get_object_or_404(Pokemon, id=pokemon_id)
 
-    img_url = DEFAULT_IMAGE_URL
-    if pokemon.image and hasattr(pokemon.image, "url"):
-        img_url = request.build_absolute_uri(pokemon.image.url)
+    img_url = get_image_url(pokemon, request)
 
     now = timezone.localtime()
     folium_map = folium.Map(location=MOSCOW_CENTER, zoom_start=12)
