@@ -29,7 +29,7 @@ def add_pokemon(folium_map, lat, lon, image_url=DEFAULT_IMAGE_URL):
 def show_all_pokemons(request):
     now = timezone.localtime()
 
-    pokemons = Pokemon.objects.prefetch_related("entities").all()
+    pokemons = Pokemon.objects.prefetch_related("entities")
 
     folium_map = folium.Map(location=MOSCOW_CENTER, zoom_start=12)
     pokemons_on_page = []
