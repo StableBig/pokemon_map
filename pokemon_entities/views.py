@@ -28,24 +28,27 @@ def add_pokemon(folium_map, lat, lon, image_url=DEFAULT_IMAGE_URL):
 
 def show_all_pokemons(request):
     now = timezone.localtime()
-    pokemons = Pokemon.objects.all()
+
+    pokemons = Pokemon.objects.prefetch_related("entities").all()
+
     folium_map = folium.Map(location=MOSCOW_CENTER, zoom_start=12)
+    pokemons_on_page = []
+
     for pokemon in pokemons:
-        for entity in pokemon.entities.filter(appeared_at__lte=now, disappeared_at__gte=now):
-            img_url = DEFAULT_IMAGE_URL
-            if pokemon.image and hasattr(pokemon.image, "url"):
-                img_url = request.build_absolute_uri(pokemon.image.url)
+        img_url = DEFAULT_IMAGE_URL
+        if pokemon.image and hasattr(pokemon.image, "url"):
+            img_url = request.build_absolute_uri(pokemon.image.url)
+
+        active_entities = [entity for entity in pokemon.entities.all() if
+                           entity.appeared_at <= now <= entity.disappeared_at]
+
+        for entity in active_entities:
             add_pokemon(
                 folium_map, entity.latitude,
                 entity.longitude,
                 img_url,
             )
 
-    pokemons_on_page = []
-    for pokemon in pokemons:
-        img_url = DEFAULT_IMAGE_URL
-        if pokemon.image and hasattr(pokemon.image, "url"):
-            img_url = request.build_absolute_uri(pokemon.image.url)
         pokemons_on_page.append({
             "pokemon_id": pokemon.id,
             "img_url": img_url,
