@@ -89,7 +89,6 @@ local_settings.py
 db.sqlite3
 media/
 images/
-/images/
 
 .idea
 .DS_Store
