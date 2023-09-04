@@ -2,7 +2,7 @@ import folium
 from django.http import HttpResponseNotFound
 from django.shortcuts import render, get_object_or_404
 from django.utils import timezone
-from .models import Pokemon
+from .models import Pokemon, PokemonEntity
 
 
 MOSCOW_CENTER = [55.751244, 37.618423]
@@ -34,47 +34,44 @@ def add_pokemon(folium_map, lat, lon, image_url=DEFAULT_IMAGE_URL):
 
 def show_all_pokemons(request):
     now = timezone.localtime()
-
-    pokemons = Pokemon.objects.prefetch_related("entities")
-
+    active_entities = PokemonEntity.objects.filter(appeared_at__lte=now, disappeared_at__gte=now).select_related("pokemon")
     folium_map = folium.Map(location=MOSCOW_CENTER, zoom_start=12)
-    pokemons_on_page = []
+    pokemons_on_page = {}
 
-    for pokemon in pokemons:
+    for entity in active_entities:
+        pokemon = entity.pokemon
         img_url = get_image_url(pokemon, request)
 
-        active_entities = [entity for entity in pokemon.entities.all() if
-                           entity.appeared_at <= now <= entity.disappeared_at]
+        add_pokemon(
+            folium_map,
+            entity.latitude,
+            entity.longitude,
+            img_url,
+        )
 
-        for entity in active_entities:
-            add_pokemon(
-                folium_map, entity.latitude,
-                entity.longitude,
-                img_url,
-            )
-
-        pokemons_on_page.append({
-            "pokemon_id": pokemon.id,
-            "img_url": img_url,
-            "title_ru": pokemon.title,
-        })
+        if pokemon.id not in pokemons_on_page:
+            pokemons_on_page[pokemon.id] = {
+                "pokemon_id": pokemon.id,
+                "img_url": img_url,
+                "title_ru": pokemon.title,
+            }
 
     return render(request, "mainpage.html", context={
         "map": folium_map._repr_html_(),
-        "pokemons": pokemons_on_page,
+        "pokemons": list(pokemons_on_page.values()),
     })
 
 
 def show_pokemon(request, pokemon_id):
     pokemon = get_object_or_404(Pokemon, id=pokemon_id)
-
     img_url = get_image_url(pokemon, request)
-
     now = timezone.localtime()
     folium_map = folium.Map(location=MOSCOW_CENTER, zoom_start=12)
+
     for entity in pokemon.entities.filter(appeared_at__lte=now, disappeared_at__gte=now):
         add_pokemon(
-            folium_map, entity.latitude,
+            folium_map,
+            entity.latitude,
             entity.longitude,
             img_url,
         )
@@ -99,6 +96,7 @@ def show_pokemon(request, pokemon_id):
         pokemon_profile["previous_evolution"] = previous_evolution
 
     next_evolution = pokemon.evolves_to.first()
+
     if next_evolution:
         next_evolution_characteristics = {
             "pokemon_id": next_evolution.id,
